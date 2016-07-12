@@ -9,6 +9,7 @@ import org.zendesk.client.v2.model.Comment;
 import org.zendesk.client.v2.model.Field;
 import org.zendesk.client.v2.model.Group;
 import org.zendesk.client.v2.model.Identity;
+import org.zendesk.client.v2.model.Locale;
 import org.zendesk.client.v2.model.Organization;
 import org.zendesk.client.v2.model.Request;
 import org.zendesk.client.v2.model.Status;
@@ -17,6 +18,7 @@ import org.zendesk.client.v2.model.User;
 import org.zendesk.client.v2.model.events.Event;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -24,6 +26,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
@@ -301,6 +306,40 @@ public class RealSmokeTest {
                 break;
             }
         }
+    }
+
+
+    @Test
+    public void getLocales() throws Exception {
+        createClientWithTokenOrPassword();
+        List<Locale> locales = instance.getLocales();
+
+        assertFalse(locales.isEmpty());
+
+        for (Locale locale : locales) {
+            assertThat(locale.getId(), notNullValue());
+            assertThat(locale.getLocale(), notNullValue());
+        }
+    }
+
+    @Test
+    public void createOrUpdateUser() throws Exception {
+        createClientWithTokenOrPassword();
+
+        // Create a User
+        User originalUser = new User("John Smith", "fake@email.com");
+        User createdUser = instance.createOrUpdateUser(originalUser);
+
+        assertNotNull(createdUser.getId());
+        assertEquals("John Smith", createdUser.getName());
+
+        // Update the user without using Zendesk's ID
+        User updatedUser = new User("Jonathan Smith", "fake@email.com");
+        updatedUser = instance.createOrUpdateUser(updatedUser);
+
+        // The update has been made on the record we expect
+        assertEquals("Jonathan Smith", updatedUser.getName());
+        assertEquals(createdUser.getId(), updatedUser.getId());
     }
 
 }

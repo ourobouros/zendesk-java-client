@@ -23,6 +23,7 @@ import org.zendesk.client.v2.model.Forum;
 import org.zendesk.client.v2.model.Group;
 import org.zendesk.client.v2.model.GroupMembership;
 import org.zendesk.client.v2.model.Identity;
+import org.zendesk.client.v2.model.Locale;
 import org.zendesk.client.v2.model.Organization;
 import org.zendesk.client.v2.model.OrganizationField;
 import org.zendesk.client.v2.model.SearchResultEntity;
@@ -1213,6 +1214,17 @@ public class Zendesk implements Closeable {
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper;
+    }
+
+    public User createOrUpdateUser(User user) {
+        return complete(submit(req("POST", cnst("/users/create_or_update.json"), JSON, json(
+                Collections.singletonMap("user", user))), handle(User.class, "user")));
+    }
+
+
+    public List<Locale> getLocales() {
+        return complete(submit(req("GET", cnst("/locales.json")), handleList(Locale.class,
+                "locales")));
     }
 
     //////////////////////////////////////////////////////////////////////
